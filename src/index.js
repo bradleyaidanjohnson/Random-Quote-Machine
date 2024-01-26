@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { useEffect } from "react";
+import { Component, useEffect, setState } from "react";
 
 import useFetch from "react-fetch-hook";
 
 const UseFetch = () => {
   const {
-    data: posts,
+    data: quotes,
     isLoading,
     error,
   } = useFetch(
@@ -23,35 +23,61 @@ const UseFetch = () => {
   if (error) {
     return <div className="error">Error: error fetching</div>;
   }
+  let quote = quotes["quotes"][1].quote;
+  let author = quotes["quotes"][1].author;
 
-  const i = Math.floor(Math.random() * 102);
-  const randomQuote = posts["quotes"][i];
+  const generateRandomQuote = () => {
+    const i = Math.floor(Math.random() * 102);
+    quote = quotes["quotes"][i].quote;
+    author = quotes["quotes"][i].author;
+    return [quote, author];
+  };
 
-  // newQuote = () => console.log("hi");
-
-  return (
-    <div id="quote-box">
-      <div id="text">
-        <blockquote>{randomQuote.quote}</blockquote>
-      </div>
-      <div id="author">{randomQuote.author}</div>
-      <button
-        id="new-quote"
-        // onClick={newQuote()}
-      >
-        Click for New Quote
-      </button>
-      <a
-        href="http://twitter.com/"
-        id="tweet-quote"
-        target="_blank"
-        rel="noreferrer"
-      >
-        Click to Tweet
-      </a>
-    </div>
-  );
+  return <QuoteBox quotes={quotes} />;
 };
+
+class QuoteBox extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { quoteIndex: Math.floor(Math.random() * 102) };
+    this.randomQuote = this.randomQuote.bind(this);
+  }
+  randomQuote() {
+    this.setState({
+      quoteIndex: Math.floor(Math.random() * 102),
+    });
+  }
+
+  render() {
+    const quote = this.props.quotes["quotes"][this.state.quoteIndex].quote;
+    const author = this.props.quotes["quotes"][this.state.quoteIndex].author;
+    const tweet = `https://twitter.com/intent/tweet?text='${quote.replaceAll(
+      " ",
+      "%20"
+    )}'%0A%20%20-${author.replaceAll(" ", "%20")}`;
+    console.log(tweet);
+    return (
+      <div id="quote-box">
+        <div id="text">
+          <blockquote>{quote}</blockquote>
+        </div>
+        <div id="author">{author}</div>
+        <button id="new-quote" onClick={this.randomQuote}>
+          Click for New Quote
+        </button>
+        <a
+          className="twitter-share-button"
+          href={tweet}
+          id="tweet-quote"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Click to Tweet
+        </a>
+      </div>
+    );
+  }
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
